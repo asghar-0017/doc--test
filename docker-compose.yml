@@ -1,15 +1,50 @@
-version: "3.8"
+version: '3.8'
 
 services:
-  app:
-    build: .
+  file-converter:
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: file-converter
+    volumes:
+      - .:/app
     ports:
       - "5152:5152"
-    volumes:
-      - .:/usr/src/app  
-      - ./uploads:/usr/src/app/uploads
+    depends_on:
+      - libreoffice-container
+      - poppler-container
     environment:
-      - PORT=5152
-    command: ["node", "index.js"]  # Directly run the app without development flags
+      - NODE_ENV=development
+    networks:
+      - file-net
+
+  libreoffice-container:
+    image: linuxserver/libreoffice
+    container_name: libreoffice-container
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - DISPLAY=:1
+    volumes:
+      - ./data:/config
+    ports:
+      - "3000:3000"
+    shm_size: "2gb"
     restart: unless-stopped
+    networks:
+      - file-net
+
+  poppler-container:
+    image: minidocks/poppler
+    container_name: poppler-container
+    volumes:
+      - ./data:/data
+    entrypoint: tail -f /dev/null
+    restart: unless-stopped
+    networks:
+      - file-net
+
+networks:
+  file-net:
+    driver: bridge

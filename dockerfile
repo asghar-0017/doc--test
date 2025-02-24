@@ -1,17 +1,13 @@
 FROM node:18
-WORKDIR /usr/src/app
 
-RUN apt-get update && apt-get install -y \
-    libreoffice \
-    poppler-utils \
-    fonts-liberation \
-    chromium \
-    && rm -rf /var/lib/apt/lists/*
+WORKDIR /usr/src/app
 
 COPY package*.json ./
 RUN npm install
 
 COPY . .
+
+ENV NODE_ENV=production
 
 EXPOSE 5152
 

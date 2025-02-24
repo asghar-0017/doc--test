@@ -19,7 +19,7 @@ app.get("/", (req, res) => {
 
 const startServer = async () => {
   try {
-    const PORT = process.env.PORT || 5152;
+    const PORT =  5154;
     app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
   } catch (error) {
     console.error("❌ Error during server initialization:", error.message);
