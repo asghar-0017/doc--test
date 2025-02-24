@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    container_name: file-converter
+    ports:
+      - "5152:5152"
+    volumes:
+      - .:/usr/src/app  
+      - ./uploads:/usr/src/app/uploads
+    environment:
+      - PORT=5152
+    command: ["node", "index.js"]  # Directly run the app without development flags
+    restart: unless-stopped
