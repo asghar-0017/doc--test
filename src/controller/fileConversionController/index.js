@@ -63,6 +63,21 @@ const fileConverterController = {
       res.status(500).json({ error: "Error fetching images" });
     }
   },
+  getPdf: async (req, res) => {
+    try {
+      const fileName = req.params.fileName; 
+      const pdfPath = path.join(uploadDir, `${fileName}.pdf`);
+      if (!fs.existsSync(pdfPath)) {
+        return res.status(404).json({ error: "PDF file not found" });
+      }
+  
+      res.json({ success: true, pdfUrl: `/uploads/pdf-images/${fileName}.pdf` });
+    } catch (error) {
+      console.error("Error fetching PDF:", error);
+      res.status(500).json({ error: "Error fetching PDF" });
+    }
+  },
+  
   
 };
 

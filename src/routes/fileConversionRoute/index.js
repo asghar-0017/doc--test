@@ -37,6 +37,7 @@ const fileConverter = async (app) => {
   app.post("/fileConverter", upload.single("file"), fileConverterController.fileConverter);
 
   app.get("/fileConverter/:fileName", fileConverterController.getImages);
+  app.get('/get-pdf/:fileName',fileConverterController.getPdf)
 };
 
 export default fileConverter;
