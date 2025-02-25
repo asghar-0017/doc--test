@@ -7,41 +7,10 @@ services:
       dockerfile: Dockerfile
     container_name: file-converter
     volumes:
-      - .:/app
+      - "./:/usr/src/app:cached"
+      - "./data:/data"
     ports:
       - "5152:5152"
-    depends_on:
-      - libreoffice-container
-      - poppler-container
-    environment:
-      - NODE_ENV=development
-    networks:
-      - file-net
-
-  libreoffice-container:
-    image: linuxserver/libreoffice
-    container_name: libreoffice-container
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Etc/UTC
-      - DISPLAY=:1
-    volumes:
-      - ./data:/config
-    ports:
-      - "3000:3000"
-    shm_size: "2gb"
-    restart: unless-stopped
-    networks:
-      - file-net
-
-  poppler-container:
-    image: minidocks/poppler
-    container_name: poppler-container
-    volumes:
-      - ./data:/data
-    entrypoint: tail -f /dev/null
-    restart: unless-stopped
     networks:
       - file-net
 

@@ -5,9 +5,9 @@ import libre from "libreoffice-convert";
 import exceljs from "exceljs";
 import puppeteer from "puppeteer";
 import XLSX from "xlsx";
-import { createCanvas, Path2D } from 'canvas';
-global.Path2D = Path2D; // Polyfill Path2D for pdfjs-dist
-import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
+
+import { createCanvas } from "canvas";
+import pdfjsLib from "pdfjs-dist/legacy/build/pdf.js";
 
 const uploadDir = path.join("uploads", "pdf-images");
 
@@ -156,7 +156,10 @@ async function convertExcelToPDF(file) {
 
     htmlContent += "</body></html>";
 
-    const browser = await puppeteer.launch({ headless: "new" });
+    const browser = await puppeteer.launch({
+      headless: "new",
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
     const page = await browser.newPage();
 
     await page.setContent(htmlContent, { waitUntil: "networkidle0" });

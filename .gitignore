@@ -1,2 +1,5 @@
-/node_modules
-echo "data/.XDG/" >> .gitignore
+data/
+uploads/
+.XDG/
+/node_module
+node_modules
