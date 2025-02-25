@@ -5,6 +5,7 @@ import libre from "libreoffice-convert";
 import exceljs from "exceljs";
 import puppeteer from "puppeteer";
 import XLSX from "xlsx";
+import { exec } from 'child_process';
 
 import { createCanvas } from "canvas";
 import pdfjsLib from "pdfjs-dist/legacy/build/pdf.js";
