@@ -88,31 +88,23 @@ const fileConverterController = {
 
 export default fileConverterController;
 
-async function convertWordToPDF(file) {
-  try {
-    const originalName = path.basename(file.originalname, path.extname(file.originalname));
-    const outputDir = path.join("uploads", "pdf-images");
-    const outputPath = path.join(outputDir, `${originalName}.pdf`);
+async function convertWordToPDF(wordPath, outputDir) {
+  await fs.ensureDir(outputDir);
+  const pdfPath = path.join(outputDir, path.basename(wordPath, path.extname(wordPath)) + '.pdf');
 
-    if (!fs.existsSync(outputDir)) {
-      fs.mkdirSync(outputDir, { recursive: true });
-    }
+  return new Promise((resolve, reject) => {
+      const command = `libreoffice --headless --convert-to pdf --outdir "${outputDir}" "${wordPath}"`;
 
-    const result = await mammoth.convertToHtml({ path: file.path });
-    const htmlContent = result.value;
-
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
-    await page.setContent(htmlContent);
-    await page.pdf({ path: outputPath, format: "A4" });
-
-    await browser.close();
-    return outputPath;
-  } catch (error) {
-    throw new Error(`Word to PDF conversion failed: ${error.message}`);
-  }
+      exec(command, (error, stdout, stderr) => {
+          if (error) {
+              console.error(`LibreOffice conversion error: ${stderr}`);
+              return reject(new Error("Word to PDF conversion failed"));
+          }
+          console.log(`Converted Word to PDF: ${pdfPath}`);
+          resolve(pdfPath);
+      });
+  });
 }
-
 async function convertExcelToPDF(file) {
   const originalName = path.basename(file.originalname, path.extname(file.originalname));
   let htmlContent = `
