@@ -1,6 +1,6 @@
 import path from "path";
 import fs from "fs-extra";
-import multer from "multer";
+import mammoth from 'mammoth';
 import libre from "libreoffice-convert";
 import exceljs from "exceljs";
 import puppeteer from "puppeteer";
@@ -89,17 +89,28 @@ const fileConverterController = {
 export default fileConverterController;
 
 async function convertWordToPDF(file) {
-  const originalName = path.basename(file.originalname, path.extname(file.originalname));
-  const outputPath = path.join("uploads", "pdf-images", `${originalName}.pdf`);
-  const fileBuffer = fs.readFileSync(file.path);
+  try {
+    const originalName = path.basename(file.originalname, path.extname(file.originalname));
+    const outputDir = path.join("uploads", "pdf-images");
+    const outputPath = path.join(outputDir, `${originalName}.pdf`);
 
-  return new Promise((resolve, reject) => {
-    libre.convert(fileBuffer, ".pdf", undefined, (err, done) => {
-      if (err) return reject(`Word to PDF conversion failed: ${err}`);
-      fs.writeFileSync(outputPath, done);
-      resolve(outputPath);
-    });
-  });
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
+    }
+
+    const result = await mammoth.convertToHtml({ path: file.path });
+    const htmlContent = result.value;
+
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.setContent(htmlContent);
+    await page.pdf({ path: outputPath, format: "A4" });
+
+    await browser.close();
+    return outputPath;
+  } catch (error) {
+    throw new Error(`Word to PDF conversion failed: ${error.message}`);
+  }
 }
 
 async function convertExcelToPDF(file) {
@@ -182,7 +193,7 @@ async function convertExcelToPDF(file) {
 }
 
 async function convertPDFToImages(pdfPath, pdfName) {
-  const outputPath = path.join(uploadDir, pdfName);
+  const outputPath = path.resolve("uploads", "pdf-images", pdfName);
   await fs.ensureDir(outputPath);
 
   const data = new Uint8Array(fs.readFileSync(pdfPath));
@@ -196,12 +207,7 @@ async function convertPDFToImages(pdfPath, pdfName) {
     const canvas = createCanvas(viewport.width, viewport.height);
     const context = canvas.getContext("2d");
 
-    const renderContext = {
-      canvasContext: context,
-      viewport: viewport,
-    };
-
-    await page.render(renderContext).promise;
+    await page.render({ canvasContext: context, viewport }).promise;
 
     const imagePath = path.join(outputPath, `${pdfName}_page_${i}.png`);
     const buffer = canvas.toBuffer("image/png");
