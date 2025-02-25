@@ -168,9 +168,10 @@ async function convertExcelToPDF(file) {
     htmlContent += "</body></html>";
 
     const browser = await puppeteer.launch({
-      headless: "new",
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    });
+      headless: true,
+      executablePath: '/root/.cache/puppeteer/chrome/linux-133.0.6943.126/chrome-linux64/chrome',
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+  });
     const page = await browser.newPage();
 
     await page.setContent(htmlContent, { waitUntil: "networkidle0" });
