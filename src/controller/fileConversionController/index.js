@@ -89,21 +89,17 @@ const fileConverterController = {
 
 export default fileConverterController;
 
-async function convertWordToPDF(wordPath, outputDir) {
-  await fs.ensureDir(outputDir);
-  const pdfPath = path.join(outputDir, path.basename(wordPath, path.extname(wordPath)) + '.pdf');
+async function convertWordToPDF(file) {
+  const originalName = path.basename(file.originalname, path.extname(file.originalname)); 
+  const outputPath = path.join("uploads", "pdf-images", `${originalName}.pdf`); 
+  const fileBuffer = fs.readFileSync(file.path);
 
   return new Promise((resolve, reject) => {
-      const command = `libreoffice --headless --convert-to pdf --outdir "${outputDir}" "${wordPath}"`;
-
-      exec(command, (error, stdout, stderr) => {
-          if (error) {
-              console.error(`LibreOffice conversion error: ${stderr}`);
-              return reject(new Error("Word to PDF conversion failed"));
-          }
-          console.log(`Converted Word to PDF: ${pdfPath}`);
-          resolve(pdfPath);
-      });
+    libre.convert(fileBuffer, ".pdf", undefined, (err, done) => {
+      if (err) return reject(`Word to PDF conversion failed: ${err}`);
+      fs.writeFileSync(outputPath, done);
+      resolve(outputPath);
+    });
   });
 }
 async function convertExcelToPDF(file) {
